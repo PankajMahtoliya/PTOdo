@@ -15,8 +15,10 @@ import {
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+
 function History(props) {
-  const HistoryTodoList = JSON.parse(localStorage.getItem("historyList")) || [];
+  const userId = JSON.parse(localStorage.getItem("user")).id;
+  const HistoryTodoList = JSON.parse(localStorage.getItem(`historyList_${userId}`)) || [];
   const [time, setTime] = useState("all_time");
   const currentDate = moment();
   const date = moment();
@@ -26,6 +28,8 @@ function History(props) {
   const weekAgo = todayDate.subtract(7, "days");
 
   const navigate = useNavigate();
+const [historyTodoList,setHistoryTodoList]= useState(JSON.parse(localStorage.getItem(`historyList_${userId}`)) || [])
+console.log(historyTodoList)
   function onHandleHistoryClick() {
     if (HistoryTodoList.length) {
       {
@@ -40,7 +44,7 @@ function History(props) {
               )
             ),
             "history.txt"
-          );
+          )
       }
       {
         time === "last_week" &&
@@ -82,17 +86,45 @@ function History(props) {
       toast.error("No data To DownLoad");
     }
   }
+
   function onHandleHistoryClearClick() {
-    localStorage.removeItem("historyList");
+    localStorage.removeItem(`historyList_${userId}`);
     toast.success("History Deleted Successfully");
     navigate("/");
   }
 
   function onHandleSwitchClick(e) {
     setTime(e.target.value);
+      if (HistoryTodoList.length) {
+      {
+        time === "last_day" &&
+        setHistoryTodoList( filterObjectsBeforeDatefunctionfunction(
+                  HistoryTodoList,
+                  previousDay.format("MMMM Do YYYY, h:mm:ss a")
+                ))
+      }
+      {
+        time === "last_week" &&
+            setHistoryTodoList( filterObjectsBeforeDatefunctionfunction(
+                  HistoryTodoList,
+                  weekAgo.format("MMMM Do YYYY, h:mm:ss a")
+                ))
+      }
+
+      {
+        time === "last_month" &&
+           setHistoryTodoList(filterObjectsBeforeDatefunctionfunction(
+                  HistoryTodoList,
+                  monthAgo.format("MMMM Do YYYY, h:mm:ss a")
+                ))
+      }
+      {
+        time === "all_time" &&
+           setHistoryTodoList(HistoryTodoList)
+      }}
+
   }
-  
-  
+
   return (
     <div className="h-screen">
       <Header />
@@ -124,7 +156,7 @@ function History(props) {
                   Delete History <MdDeleteOutline size={25} />
                 </button>{" "}
               </div>
-              {sortByTime(HistoryTodoList).map((i) => (
+              {sortByTime(historyTodoList).map((i) => (
                 <div
                   key={i.id}
                   className="border-2 border-[#002D62] shadow-2xl mb-4 flex  flex-col rounded-lg text-white bg-[#002D62] w-max px-8 py-2"
